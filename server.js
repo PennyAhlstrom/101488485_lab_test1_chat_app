@@ -13,6 +13,9 @@ const authRoutes = require("./routes/authRoutes");
 const messageRoutes = require("./routes/messageRoutes");
 const socketHandler = require("./sockets/socketHandler");
 
+const userRoutes = require("./routes/userRoutes");
+const privateMessageRoutes = require("./routes/privateMessageRoutes");
+
 
 // Create express, http, socketio
 const app = express(); // express app
@@ -37,6 +40,8 @@ app.use(express.static(path.join(__dirname, "public")));
 // API routes
 app.use("/api", authRoutes);
 app.use("/api", messageRoutes);
+app.use("/api", userRoutes);
+app.use("/api", privateMessageRoutes);
 
 
 // Basic routes - html pages
@@ -58,6 +63,10 @@ app.get("/rooms", (req, res) => {
 
 app.get("/chat", (req, res) => {
   res.sendFile(path.join(__dirname, "views", "chat.html"));
+});
+
+app.get("/dm", (req, res) => {
+  res.sendFile(path.join(__dirname, "views", "dm.html"));
 });
 
 

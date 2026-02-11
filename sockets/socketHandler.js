@@ -1,9 +1,21 @@
 const GroupMessage = require("../models/GroupMessage");
+const PrivateMessage = require("../models/PrivateMessage");
 
 function socketHandler(io) {
   io.on("connection", (socket) => {
     console.log("🟢 Connected:", socket.id);
 
+     // Register user to a personal room for DMs
+    socket.on("registerUser", ({ username }) => {
+      if (!username) return;
+      const personalRoom = `user:${username}`;
+      socket.join(personalRoom);
+      socket.data.username = username; // store on socket
+      console.log(`👤 Registered ${username} to ${personalRoom}`);
+    });
+
+
+    // Join a room
     socket.on("joinRoom", ({ username, room }) => {
       if (!username || !room) return;
       socket.join(room);
@@ -37,6 +49,7 @@ function socketHandler(io) {
         });
 
         await msgDoc.save();
+        console.log("✅ Saved GROUP message:", msgDoc._id, "collection:", GroupMessage.collection.name);
 
         io.to(room).emit("roomMessage", {
           from_user: msgDoc.from_user,
@@ -46,6 +59,39 @@ function socketHandler(io) {
         });
       } catch (err) {
         console.error("roomMessage save error:", err.message);
+      }
+    });
+
+    // Private messaging
+    socket.on("privateTyping", ({ from_user, to_user }) => {
+      if (!from_user || !to_user) return;
+      io.to(`user:${to_user}`).emit("privateTyping", { from_user });
+    });
+
+    socket.on("privateStopTyping", ({ to_user }) => {
+      if (!to_user) return;
+      io.to(`user:${to_user}`).emit("privateStopTyping");
+    });
+
+    socket.on("privateMessage", async ({ from_user, to_user, message }) => {
+      try {
+        if (!from_user || !to_user || !message) return;
+
+        const msgDoc = new PrivateMessage({ from_user, to_user, message });
+        await msgDoc.save();
+
+        const payload = {
+          from_user: msgDoc.from_user,
+          to_user: msgDoc.to_user,
+          message: msgDoc.message,
+          date_sent: msgDoc.date_sent,
+        };
+
+        // deliver messages to both users - each has their own personal room
+        io.to(`user:${to_user}`).emit("privateMessage", payload);
+        io.to(`user:${from_user}`).emit("privateMessage", payload);
+      } catch (err) {
+        console.error("privateMessage save error:", err.message);
       }
     });
 
