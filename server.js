@@ -9,6 +9,9 @@ const cors = require("cors"); // used to allow the backend to call the browser
 const { Server } = require("socket.io"); // socket is our realtime messaging system
 const connectDB = require("./config/db"); // import the mongodb connection string
 
+const authRoutes = require("./routes/authRoutes");
+
+
 // Create express, http, socketio
 const app = express(); // express app
 const server = http.createServer(app); // http server running express (socket io needs this)
@@ -29,7 +32,10 @@ app.use(express.urlencoded({ extended: true })); // for express to read incoming
 // Serve static files - make everything inside public/ available to the browser
 app.use(express.static(path.join(__dirname, "public")));
 
-// Basic routes
+// API routes
+app.use("/api", authRoutes);
+
+// Basic routes - html pages
 app.get("/", (req, res) => { // Home page to login page
   res.redirect("/login");
 });
@@ -49,6 +55,7 @@ app.get("/rooms", (req, res) => {
 app.get("/chat", (req, res) => {
   res.sendFile(path.join(__dirname, "views", "chat.html"));
 });
+
 
 // Check that express works and the server is running
 // Useful for testing
