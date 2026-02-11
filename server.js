@@ -10,6 +10,8 @@ const { Server } = require("socket.io"); // socket is our realtime messaging sys
 const connectDB = require("./config/db"); // import the mongodb connection string
 
 const authRoutes = require("./routes/authRoutes");
+const messageRoutes = require("./routes/messageRoutes");
+const socketHandler = require("./sockets/socketHandler");
 
 
 // Create express, http, socketio
@@ -34,6 +36,8 @@ app.use(express.static(path.join(__dirname, "public")));
 
 // API routes
 app.use("/api", authRoutes);
+app.use("/api", messageRoutes);
+
 
 // Basic routes - html pages
 app.get("/", (req, res) => { // Home page to login page
@@ -64,16 +68,18 @@ app.get("/api/health", (req, res) => {
   res.json({ status: "ok", message: "Server is running" });
 });
 
-// Socket.io connection events
-io.on("connection", (socket) => {
-  console.log("🟢 A user connected:", socket.id); // Logs the socket id
+// // Socket.io connection events
+// io.on("connection", (socket) => {
+//   console.log("🟢 A user connected:", socket.id); // Logs the socket id
 
-  socket.emit("connected", { socketId: socket.id }); // Send the socket id back to the client
+//   socket.emit("connected", { socketId: socket.id }); // Send the socket id back to the client
 
-  socket.on("disconnect", () => {
-    console.log("🔴 A user disconnected:", socket.id); // Logs disconnections 
-  });
-});
+//   socket.on("disconnect", () => {
+//     console.log("🔴 A user disconnected:", socket.id); // Logs disconnections 
+//   });
+// });
+
+socketHandler(io);
 
 // Start the server
 const PORT = process.env.PORT || 3000; // Use specified .env port or 3000 if non exist
