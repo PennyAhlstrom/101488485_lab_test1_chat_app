@@ -1,5 +1,3 @@
-// public/js/chat.js
-
 const messagesBox = document.getElementById("messagesBox");
 const chatForm = document.getElementById("chatForm");
 const messageInput = document.getElementById("messageInput");

@@ -1,5 +1,3 @@
-// public/js/rooms.js
-
 const rooms = [
   "chit-chat",
   "gossip",
@@ -52,9 +50,6 @@ function renderRooms() {
     btn.addEventListener("click", () => {
       // Save selected room for chat page to use
       localStorage.setItem("currentRoom", roomName);
-
-      // Optional: clear any last private chat target you might add later
-      // localStorage.removeItem("currentDMUser");
 
       window.location.href = "/chat";
     });
