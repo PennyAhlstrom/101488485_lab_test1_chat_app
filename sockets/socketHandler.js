@@ -79,6 +79,7 @@ function socketHandler(io) {
 
         const msgDoc = new PrivateMessage({ from_user, to_user, message });
         await msgDoc.save();
+        console.log("✅ Saved PRIVATE message:", msgDoc._id, "collection:", PrivateMessage.collection.name);
 
         const payload = {
           from_user: msgDoc.from_user,
